@@ -1,0 +1,83 @@
+{
+  "name": "Dental - Citas Chat IA",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "id": "webhook-cita",
+      "name": "Webhook Cita",
+      "webhookId": "dental-cita",
+      "path": "dental-cita",
+      "responseMode": "responseNode",
+      "options": {},
+      "httpMethod": "POST"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Los datos vienen del body del POST\nconst body = $input.first().json.body || $input.first().json;\n\nreturn [\n  {\n    json: {\n      nombre: body.nombre || 'Sin nombre',\n      telefono: body.telefono || 'Sin teléfono',\n      motivo: body.motivo || 'No especificado',\n      preferencia_horaria: body.preferencia_horaria || 'No especificada',\n      fecha_creacion: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 0],
+      "id": "procesar-datos",
+      "name": "Procesar Datos"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\":true,\"message\":\"Cita registrada correctamente. Nos pondremos en contacto contigo en breve.\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [600, -100],
+      "id": "responder-chat",
+      "name": "Responder al Chat"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aquí puedes añadir tu lógica personalizada:\n// - Enviar email al equipo\n// - Guardar en Google Sheets\n// - Crear evento en Google Calendar\n// - Enviar notificación a Slack/Telegram\n// - Llamar a la API de tu CRM\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 100],
+      "id": "acciones-adicionales",
+      "name": "Acciones Adicionales"
+    }
+  ],
+  "connections": {
+    "Webhook Cita": {
+      "main": [
+        [
+          {
+            "node": "Procesar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Datos": {
+      "main": [
+        [
+          {
+            "node": "Responder al Chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Acciones Adicionales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["dental", "citas", "chat-ia"]
+}
